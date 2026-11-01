@@ -144,11 +144,11 @@ export async function quantumStatus(request: Request) {
   if (!configured) return { configured: false, provider: PROVIDER, canSubmit: false, reason: "IBM Quantum hardware has not been configured on the server." };
   if (!request.headers.get("oai-authenticated-user-id")) return { configured: true, provider: PROVIDER, canSubmit: false, reason: "Sign in to this site to run a hardware demonstration." };
   try {
-    const state = await readiness();
-    if (state.canSubmit && env.DB) {
-      const pending = await env.DB.prepare("SELECT id FROM quantum_jobs WHERE owner_id = ? AND status IN ('submitting','uncertain','queued','running') LIMIT 1").bind(owner(request)).first<{ id: string }>();
-      if (pending) return { configured, provider: PROVIDER, ...state, canSubmit: false, activeJobId: pending.id, reason: "A hardware job is already pending for this account." };
+    if (env.DB) {
+      const pending = await env.DB.prepare("SELECT id,backend FROM quantum_jobs WHERE owner_id = ? AND status IN ('submitting','uncertain','queued','running') LIMIT 1").bind(owner(request)).first<{ id: string; backend: string }>();
+      if (pending) return { configured, provider: PROVIDER, backend: pending.backend, canSubmit: false, activeJobId: pending.id, reason: "A hardware job is already pending for this account." };
     }
+    const state = await readiness();
     return { configured, provider: PROVIDER, ...state };
   } catch (error) { return { configured, provider: PROVIDER, canSubmit: false, reason: error instanceof QuantumError ? error.message : "IBM Quantum is temporarily unavailable." }; }
 }

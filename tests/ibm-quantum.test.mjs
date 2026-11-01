@@ -216,3 +216,18 @@ test('IBM execution-time cancellation is normalized without a simulated fallback
   assert.equal(result.lesson, undefined);
   assert.match(result.error, /No simulation/);
 });
+
+test('an existing hardware job remains resumable when IBM readiness is unavailable', async () => {
+  const calls = fixture();
+  const created = await backend.startHardwareJob(request(undefined, { data: { intercept: false } }));
+  const callCount = calls.length;
+  globalThis.fetch = async () => { throw new Error('IBM readiness is unreachable'); };
+  const status = await backend.quantumStatus(request('/api/quantum/status'));
+  assert.equal(status.activeJobId, created.id);
+  assert.equal(status.backend, created.backend);
+  assert.equal(status.canSubmit, false);
+  assert.match(status.reason, /already pending/);
+  assert.equal(calls.length, callCount, 'Resuming a stored job must not depend on new-submission readiness');
+  const otherOwner = await backend.quantumStatus(request('/api/quantum/status', { user: 'other' }));
+  assert.equal(otherOwner.activeJobId, undefined, 'Only the existing job owner may resume it');
+});

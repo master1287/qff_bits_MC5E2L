@@ -8,7 +8,7 @@ An orange-and-black messaging app with an inline BB84 startup flow, a conditiona
 
 Choose a target chance of detecting a full intercept-resend attack, inspect the calculated transmission and public-sample budget, and follow five teaching qubits inside the chat window before starting a conversation. The walkthrough shows Alice's Z/X encoding, Eve's optional measurement and resend, Bob's results, basis sifting, and discarded public-sample comparisons. The interface uses self-hosted Poppins and very slightly rounded panels.
 
-IBM jobs use the current Quantum Runtime REST API with server-side IAM authentication, owner-scoped job records, quota checks, and bounded execution. Hardware results identify the backend and job ID. Qiskit-generated simulation results are labeled separately and are never silently substituted for hardware.
+IBM jobs use the current Quantum Runtime REST API with server-side IAM authentication, a shared public teaching-job queue, quota checks, and bounded execution. Hardware results identify the backend and job ID. Qiskit-generated simulation results are labeled separately and are never silently substituted for hardware.
 
 ## Security model
 

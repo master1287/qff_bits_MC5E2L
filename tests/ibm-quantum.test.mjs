@@ -84,9 +84,9 @@ test('status never exposes API keys or tokens and blocks unknown paid spending',
   assert.equal(JSON.stringify(status).includes('fake-iam-token'), false);
 });
 
-test('authenticated hardware submission is bounded, native-gated and owner-scoped', async () => {
+test('anonymous hardware submission is bounded, native-gated and shared publicly', async () => {
   const calls = fixture();
-  const result = await backend.startHardwareJob(request(undefined, { data: { intercept: true } }));
+  const result = await backend.startHardwareJob(request(undefined, { user: '', data: { intercept: true } }));
   assert.equal(result.id, 'hardware-job-001');
   assert.equal(result.status, 'queued');
   assert.equal(result.shots, 128);
@@ -106,16 +106,16 @@ test('authenticated hardware submission is bounded, native-gated and owner-scope
   assert.equal(submit.init.headers.Authorization, 'Bearer fake-iam-token');
   assert.equal(submit.init.body.includes('fake-unit-key'), false);
   const countBefore = calls.length;
-  await assert.rejects(backend.hardwareJob(request('/api/quantum/jobs/hardware-job-001', { user: 'other' }), result.id), /unavailable/);
-  assert.equal(calls.length, countBefore, 'Unknown owner must not trigger an IBM job query');
-  await assert.rejects(backend.startHardwareJob(request(undefined, { data: { intercept: false } })), /pending/);
+  await assert.rejects(backend.hardwareJob(request('/api/quantum/jobs/unregistered-job-9', { user: '' }), 'unregistered-job-9'), /unavailable/);
+  assert.equal(calls.length, countBefore, 'An unregistered job must not trigger an IBM query');
+  await assert.rejects(backend.startHardwareJob(request(undefined, { user: 'different-visitor', data: { intercept: false } })), /pending/);
   assert.equal(calls.filter(call => call.init.method === 'POST' && call.url.endsWith('/jobs')).length, 1);
 });
 
 test('hardware results retain first-shot bit ordering and cache teaching-only output', async () => {
   const calls = fixture();
   const created = await backend.startHardwareJob(request(undefined, { data: { intercept: true } }));
-  const result = await backend.hardwareJob(request(), created.id);
+  const result = await backend.hardwareJob(request(undefined, { user: '' }), created.id);
   assert.equal(result.status, 'completed');
   assert.equal(result.lesson.engine, 'ibm-quantum-hardware');
   assert.equal(result.lesson.execution, 'hardware');
@@ -136,9 +136,8 @@ test('hardware results retain first-shot bit ordering and cache teaching-only ou
   assert.equal(calls.length, queries, 'Completed results should be returned from the site cache');
 });
 
-test('missing identity, cross-origin writes and malformed requests cannot submit', async () => {
+test('cross-origin writes and malformed public requests cannot submit', async () => {
   const calls = fixture();
-  await assert.rejects(backend.startHardwareJob(request(undefined, { user: '', data: { intercept: false } })), /Sign in/);
   await assert.rejects(backend.startHardwareJob(request(undefined, { data: { intercept: true }, origin: 'https://unrelated.test' })), /this website/);
   await assert.rejects(backend.startHardwareJob(request(undefined, { data: { intercept: 'yes' } })), /whether/);
   await assert.rejects(backend.startHardwareJob(request(undefined, { data: { intercept: false, shots: 1000000 } })), /whether/);
@@ -182,11 +181,8 @@ test('faulty and nonoperational physical qubits are excluded and their mapping i
   assert.throws(() => backend.hardwareQasm(true, [0, 0, 1, 2, 3]), /mapping/);
 });
 
-test('unconfigured or unsigned status checks do not contact IBM', async () => {
+test('unconfigured status checks do not contact IBM', async () => {
   const calls = fixture();
-  const unsigned = await backend.quantumStatus(request('/api/quantum/status', { user: '' }));
-  assert.equal(unsigned.canSubmit, false);
-  assert.match(unsigned.reason, /Sign in/);
   delete globalThis.__ibmQuantumTestEnv.IBM_QUANTUM_API_KEY;
   const unconfigured = await backend.quantumStatus(request('/api/quantum/status'));
   assert.equal(unconfigured.configured, false);
@@ -229,5 +225,9 @@ test('an existing hardware job remains resumable when IBM readiness is unavailab
   assert.match(status.reason, /already pending/);
   assert.equal(calls.length, callCount, 'Resuming a stored job must not depend on new-submission readiness');
   const otherOwner = await backend.quantumStatus(request('/api/quantum/status', { user: 'other' }));
-  assert.equal(otherOwner.activeJobId, undefined, 'Only the existing job owner may resume it');
+  assert.equal(otherOwner.activeJobId, created.id, 'Any visitor can resume the public teaching job');
+});
+
+ test('anonymous status allows real hardware and does not return a sign-in flow', async()=>{
+ fixture();const status=await backend.quantumStatus(request('/api/quantum/status',{user:''}));assert.equal(status.canSubmit,true);assert.equal(status.signInPath,undefined);assert.equal(status.signInLabel,undefined);assert.equal(JSON.stringify(status).includes('fake-unit-key'),false);
 });

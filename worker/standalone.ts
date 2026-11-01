@@ -1,11 +1,14 @@
 import handler from 'vinext/server/fetch-handler';
-import { ownerAuthResponse, ownerRequest } from '../lib/owner-auth.mjs';
 
 export default {
   async fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext) {
-    const auth = await ownerAuthResponse(request, env);
-    if (auth) return auth;
-    // External clients cannot supply the identity consumed by the IBM routes.
-    return handler.fetch(await ownerRequest(request,env),env,ctx);
+    // Retired sign-in links return visitors directly to the public messenger.
+    if (['/owner-login','/owner-session','/owner-logout'].includes(new URL(request.url).pathname)) {
+      return new Response(null,{status:303,headers:{Location:'/', 'Cache-Control':'no-store',
+        'Set-Cookie':'__Host-qubit-owner=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0'}});
+    }
+    const headers = new Headers(request.headers);
+    for (const name of [...headers.keys()]) if (name.startsWith('oai-authenticated-user-')) headers.delete(name);
+    return handler.fetch(new Request(request,{headers}),env,ctx);
   },
 };

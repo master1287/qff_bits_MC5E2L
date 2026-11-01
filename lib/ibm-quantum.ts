@@ -7,6 +7,7 @@ type Basis = "Z" | "X";
 const PROVIDER = "ibm-quantum";
 const VERSION = "2026-04-15";
 const SHOTS = 128;
+const PUBLIC_JOB_SCOPE = "public-bb84-demonstration";
 const ALICE_BITS = [0, 1, 1, 0, 1];
 const ALICE_BASES: Basis[] = ["Z", "X", "Z", "X", "Z"];
 const BOB_BASES: Basis[] = ["Z", "Z", "Z", "X", "X"];
@@ -27,11 +28,6 @@ function settings() {
   const region = crn.split(":")[5];
   if (!["us-east", "eu-de"].includes(region)) throw new QuantumError(503, "This IBM Quantum instance region is unsupported.");
   return { current, apiKey: current.IBM_QUANTUM_API_KEY, crn, base: region === "eu-de" ? "https://eu-de.quantum.cloud.ibm.com/api/v1" : "https://quantum.cloud.ibm.com/api/v1" };
-}
-function owner(request: Request) {
-  const id = request.headers.get("oai-authenticated-user-id");
-  if (!id || id.length > 200) throw new QuantumError(401, "Sign in to this site before using IBM Quantum hardware.");
-  return id;
 }
 function database() { if (!env.DB) throw new QuantumError(503, "Hardware job storage is unavailable."); return env.DB; }
 
@@ -150,11 +146,10 @@ export async function quantumStatus(request: Request) {
   const current = env as IBMEnv;
   const configured = Boolean(current.IBM_QUANTUM_API_KEY && current.IBM_QUANTUM_CRN);
   if (!configured) return { configured: false, provider: PROVIDER, canSubmit: false, reason: "IBM Quantum hardware has not been configured on the server." };
-  if (!request.headers.get("oai-authenticated-user-id")) return { configured: true, provider: PROVIDER, canSubmit: false, reason: "Sign in to this site to run a hardware demonstration.", ...(current.QUBIT_STANDALONE === "true" ? { signInPath: "/owner-login", signInLabel: "Owner sign-in" } : {}) };
   try {
     if (env.DB) {
-      const pending = await env.DB.prepare("SELECT id,backend FROM quantum_jobs WHERE owner_id = ? AND status IN ('submitting','uncertain','queued','running') LIMIT 1").bind(owner(request)).first<{ id: string; backend: string }>();
-      if (pending) return { configured, provider: PROVIDER, backend: pending.backend, canSubmit: false, activeJobId: pending.id, reason: "A hardware job is already pending for this account." };
+      const pending = await env.DB.prepare("SELECT id,backend FROM quantum_jobs WHERE status IN ('submitting','uncertain','queued','running') LIMIT 1").first<{ id: string; backend: string }>();
+      if (pending) return { configured, provider: PROVIDER, backend: pending.backend, canSubmit: false, activeJobId: pending.id, reason: "A public hardware job is already pending. You can follow its progress." };
     }
     const state = await readiness();
     return { configured, provider: PROVIDER, ...state };
@@ -193,7 +188,6 @@ async function input(request: Request) {
 }
 
 export async function startHardwareJob(request: Request) {
-  const user = owner(request);
   const intercept = await input(request);
   const db = database();
   const state = await readiness();
@@ -201,8 +195,8 @@ export async function startHardwareJob(request: Request) {
   const claim = `pending-${crypto.randomUUID()}`;
   const now = new Date();
   const physicalQubits = state.physicalQubits ?? [0, 1, 2, 3, 4];
-  const inserted = await db.prepare("INSERT INTO quantum_jobs (id,backend,intercept,created_at,owner_id,status,result) SELECT ?,?,?,?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM quantum_jobs WHERE owner_id = ? AND (status IN ('submitting','uncertain','queued','running') OR created_at > ?))")
-    .bind(claim, state.backend, intercept ? 1 : 0, now.toISOString(), user, "submitting", JSON.stringify({ physicalQubits }), user, new Date(now.getTime() - 30000).toISOString()).run();
+  const inserted = await db.prepare("INSERT INTO quantum_jobs (id,backend,intercept,created_at,owner_id,status,result) SELECT ?,?,?,?,?,?,? WHERE NOT EXISTS (SELECT 1 FROM quantum_jobs WHERE status IN ('submitting','uncertain','queued','running') OR created_at > ?)")
+    .bind(claim, state.backend, intercept ? 1 : 0, now.toISOString(), PUBLIC_JOB_SCOPE, "submitting", JSON.stringify({ physicalQubits }), new Date(now.getTime() - 30000).toISOString()).run();
   if (!inserted.meta.changes) throw new QuantumError(409, "A hardware job is pending, or a job was submitted very recently. Continue checking the existing job.");
   try {
     const result = await ibm("/jobs", "POST", { program_id: "sampler", backend: state.backend, cost: 60, tags: ["qubit-bb84-teaching"],
@@ -210,13 +204,13 @@ export async function startHardwareJob(request: Request) {
         options: { twirling: { enable_gates: false, enable_measure: false } } },
     });
     if (typeof result.id !== "string" || !/^[A-Za-z0-9_-]{5,100}$/.test(result.id)) throw new QuantumError(502, "The IBM submission could not be confirmed. Check IBM Workloads before retrying.");
-    await db.prepare("UPDATE quantum_jobs SET id = ?, status = 'queued' WHERE id = ? AND owner_id = ?").bind(result.id, claim, user).run();
+    await db.prepare("UPDATE quantum_jobs SET id = ?, status = 'queued' WHERE id = ?").bind(result.id, claim).run();
     return { id: result.id, status: "queued", backend: state.backend, shots: SHOTS, provider: PROVIDER, hardware: true };
   } catch (error) {
     // An interrupted POST may have reached IBM. Keep a blocking claim rather
     // than submit a potentially billable duplicate automatically.
     const status = error instanceof QuantumError && error.submissionRejected ? "failed" : "uncertain";
-    await db.prepare("UPDATE quantum_jobs SET status = ? WHERE id = ? AND owner_id = ?").bind(status, claim, user).run();
+    await db.prepare("UPDATE quantum_jobs SET status = ? WHERE id = ?").bind(status, claim).run();
     throw error;
   }
 }
@@ -259,10 +253,9 @@ export function hardwareLesson(raw: unknown, job: Pick<JobRow, "id" | "backend" 
 }
 
 export async function hardwareJob(request: Request, id: string) {
-  const user = owner(request);
   if (!/^[A-Za-z0-9_-]{5,100}$/.test(id)) throw new QuantumError(404, "This hardware job is unavailable.");
   const db = database();
-  const job = await db.prepare("SELECT * FROM quantum_jobs WHERE id = ? AND owner_id = ?").bind(id, user).first<JobRow>();
+  const job = await db.prepare("SELECT * FROM quantum_jobs WHERE id = ?").bind(id).first<JobRow>();
   if (!job) throw new QuantumError(404, "This hardware job is unavailable.");
   const summary = { id, backend: job.backend, shots: SHOTS, provider: PROVIDER, hardware: true };
   if (job.status === "completed" && job.result) return { ...summary, status: "completed", lesson: JSON.parse(job.result) };
@@ -277,10 +270,10 @@ export async function hardwareJob(request: Request, id: string) {
     const result = await ibm(`/jobs/${encodeURIComponent(id)}/results`);
     const mapping = job.result ? object(JSON.parse(job.result)).physicalQubits : undefined;
     const lesson = hardwareLesson(result, { ...job, physicalQubits: Array.isArray(mapping) ? mapping as number[] : undefined });
-    await db.prepare("UPDATE quantum_jobs SET status = 'completed', result = ? WHERE id = ? AND owner_id = ?").bind(JSON.stringify(lesson), id, user).run();
+    await db.prepare("UPDATE quantum_jobs SET status = 'completed', result = ? WHERE id = ?").bind(JSON.stringify(lesson), id).run();
     return { ...summary, status, lesson };
   }
-  await db.prepare("UPDATE quantum_jobs SET status = ? WHERE id = ? AND owner_id = ?").bind(status, id, user).run();
+  await db.prepare("UPDATE quantum_jobs SET status = ? WHERE id = ?").bind(status, id).run();
   return { ...summary, status, ...(["failed", "cancelled"].includes(status) ? { error: "IBM hardware did not complete this job. No simulation was substituted." } : {}) };
 }
 

@@ -2,7 +2,7 @@
 
 An orange-and-black messaging app with an inline BB84 startup flow, a conditional disturbance-detection planner, and IBM Quantum hardware demonstrations.
 
-[Open the application](https://qubit-bb84-messenger.chalkypath1.chatgpt.site/)
+[Open the application](https://master1287.github.io/qbits_chat/)
 
 ## Experience
 

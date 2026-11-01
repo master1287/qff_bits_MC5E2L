@@ -1,0 +1,2 @@
+qiskit==2.6.1
+cryptography==50.0.2

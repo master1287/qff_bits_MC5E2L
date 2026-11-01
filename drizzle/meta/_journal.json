@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1793451066822,
+      "tag": "0000_spotty_agent_zero",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793465364475,
+      "tag": "0001_violet_the_professor",
+      "breakpoints": true
+    }
+  ]
+}

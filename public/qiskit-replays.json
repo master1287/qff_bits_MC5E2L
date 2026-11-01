@@ -1,0 +1,233 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-31T14:18:26.450271+00:00",
+  "qiskitVersion": "2.6.1",
+  "scenarios": {
+    "clean": {
+      "id": "qiskit-clean-84",
+      "engine": "qiskit-statevector",
+      "qiskitVersion": "2.6.1",
+      "educational": true,
+      "intercept": false,
+      "curated": true,
+      "selection": "A reproducible five-qubit teaching example.",
+      "securityNotice": "Teaching bits only, unrelated to chat keys. Five qubits cannot establish a secure key or guarantee detecting Eve.",
+      "rows": [
+        {
+          "index": 1,
+          "aliceBit": 0,
+          "aliceBasis": "Z",
+          "aliceState": "|0⟩",
+          "aliceGates": [],
+          "eveBasis": null,
+          "eveBit": null,
+          "eveState": null,
+          "bobBasis": "Z",
+          "bobBit": 0,
+          "bobState": "|0⟩",
+          "basisMatches": true,
+          "bitMatches": true,
+          "sampled": true
+        },
+        {
+          "index": 2,
+          "aliceBit": 1,
+          "aliceBasis": "X",
+          "aliceState": "|−⟩",
+          "aliceGates": [
+            "X",
+            "H"
+          ],
+          "eveBasis": null,
+          "eveBit": null,
+          "eveState": null,
+          "bobBasis": "Z",
+          "bobBit": 1,
+          "bobState": "|1⟩",
+          "basisMatches": false,
+          "bitMatches": true,
+          "sampled": false
+        },
+        {
+          "index": 3,
+          "aliceBit": 1,
+          "aliceBasis": "Z",
+          "aliceState": "|1⟩",
+          "aliceGates": [
+            "X"
+          ],
+          "eveBasis": null,
+          "eveBit": null,
+          "eveState": null,
+          "bobBasis": "Z",
+          "bobBit": 1,
+          "bobState": "|1⟩",
+          "basisMatches": true,
+          "bitMatches": true,
+          "sampled": false
+        },
+        {
+          "index": 4,
+          "aliceBit": 0,
+          "aliceBasis": "X",
+          "aliceState": "|+⟩",
+          "aliceGates": [
+            "H"
+          ],
+          "eveBasis": null,
+          "eveBit": null,
+          "eveState": null,
+          "bobBasis": "X",
+          "bobBit": 0,
+          "bobState": "|+⟩",
+          "basisMatches": true,
+          "bitMatches": true,
+          "sampled": true
+        },
+        {
+          "index": 5,
+          "aliceBit": 1,
+          "aliceBasis": "Z",
+          "aliceState": "|1⟩",
+          "aliceGates": [
+            "X"
+          ],
+          "eveBasis": null,
+          "eveBit": null,
+          "eveState": null,
+          "bobBasis": "X",
+          "bobBit": 1,
+          "bobState": "|−⟩",
+          "basisMatches": false,
+          "bitMatches": true,
+          "sampled": false
+        }
+      ],
+      "statistics": {
+        "sent": 5,
+        "sifted": 3,
+        "sampled": 2,
+        "errors": 0,
+        "qber": 0.0,
+        "detected": false,
+        "remainingBits": [
+          1
+        ]
+      },
+      "circuit": "                Alice prepares ┌─┐                 \nq_0: ─────────────────░────────┤M├─────────────────\n     ┌───┐┌───┐       ░        └╥┘┌─┐              \nq_1: ┤ X ├┤ H ├───────░─────────╫─┤M├──────────────\n     ├───┤└───┘       ░         ║ └╥┘┌─┐           \nq_2: ┤ X ├────────────░─────────╫──╫─┤M├───────────\n     ├───┤            ░         ║  ║ └╥┘┌───┐┌─┐   \nq_3: ┤ H ├────────────░─────────╫──╫──╫─┤ H ├┤M├───\n     ├───┤            ░         ║  ║  ║ ├───┤└╥┘┌─┐\nq_4: ┤ X ├────────────░─────────╫──╫──╫─┤ H ├─╫─┤M├\n     └───┘            ░         ║  ║  ║ └───┘ ║ └╥┘\nc_0: ═══════════════════════════╩══╬══╬═══════╬══╬═\n                                   ║  ║       ║  ║ \nc_1: ══════════════════════════════╩══╬═══════╬══╬═\n                                      ║       ║  ║ \nc_2: ═════════════════════════════════╩═══════╬══╬═\n                                              ║  ║ \nc_3: ═════════════════════════════════════════╩══╬═\n                                                 ║ \nc_4: ════════════════════════════════════════════╩═\n                                                   "
+    },
+    "intercept": {
+      "id": "qiskit-intercept-84",
+      "engine": "qiskit-statevector",
+      "qiskitVersion": "2.6.1",
+      "educational": true,
+      "intercept": true,
+      "curated": true,
+      "selection": "A teaching example selected to show a disclosed disturbance; other small samples can miss Eve.",
+      "securityNotice": "Teaching bits only, unrelated to chat keys. Five qubits cannot establish a secure key or guarantee detecting Eve.",
+      "rows": [
+        {
+          "index": 1,
+          "aliceBit": 0,
+          "aliceBasis": "Z",
+          "aliceState": "|0⟩",
+          "aliceGates": [],
+          "eveBasis": "X",
+          "eveBit": 1,
+          "eveState": "|−⟩",
+          "bobBasis": "Z",
+          "bobBit": 1,
+          "bobState": "|1⟩",
+          "basisMatches": true,
+          "bitMatches": false,
+          "sampled": true
+        },
+        {
+          "index": 2,
+          "aliceBit": 1,
+          "aliceBasis": "X",
+          "aliceState": "|−⟩",
+          "aliceGates": [
+            "X",
+            "H"
+          ],
+          "eveBasis": "Z",
+          "eveBit": 0,
+          "eveState": "|0⟩",
+          "bobBasis": "Z",
+          "bobBit": 0,
+          "bobState": "|0⟩",
+          "basisMatches": false,
+          "bitMatches": false,
+          "sampled": false
+        },
+        {
+          "index": 3,
+          "aliceBit": 1,
+          "aliceBasis": "Z",
+          "aliceState": "|1⟩",
+          "aliceGates": [
+            "X"
+          ],
+          "eveBasis": "Z",
+          "eveBit": 1,
+          "eveState": "|1⟩",
+          "bobBasis": "Z",
+          "bobBit": 1,
+          "bobState": "|1⟩",
+          "basisMatches": true,
+          "bitMatches": true,
+          "sampled": false
+        },
+        {
+          "index": 4,
+          "aliceBit": 0,
+          "aliceBasis": "X",
+          "aliceState": "|+⟩",
+          "aliceGates": [
+            "H"
+          ],
+          "eveBasis": "Z",
+          "eveBit": 0,
+          "eveState": "|0⟩",
+          "bobBasis": "X",
+          "bobBit": 1,
+          "bobState": "|−⟩",
+          "basisMatches": true,
+          "bitMatches": false,
+          "sampled": true
+        },
+        {
+          "index": 5,
+          "aliceBit": 1,
+          "aliceBasis": "Z",
+          "aliceState": "|1⟩",
+          "aliceGates": [
+            "X"
+          ],
+          "eveBasis": "X",
+          "eveBit": 1,
+          "eveState": "|−⟩",
+          "bobBasis": "X",
+          "bobBit": 1,
+          "bobState": "|−⟩",
+          "basisMatches": false,
+          "bitMatches": true,
+          "sampled": false
+        }
+      ],
+      "statistics": {
+        "sent": 5,
+        "sifted": 3,
+        "sampled": 2,
+        "errors": 2,
+        "qber": 1.0,
+        "detected": true,
+        "remainingBits": [
+          1
+        ]
+      },
+      "circuit": "                Alice prepares ┌───┐           ┌─┐┌───┐      Eve resends ┌─┐                 \nq_0: ─────────────────░────────┤ H ├───────────┤M├┤ H ├───────────░──────┤M├─────────────────\n     ┌───┐┌───┐       ░        └┬─┬┘           └╥┘└───┘           ░      └╥┘┌─┐              \nq_1: ┤ X ├┤ H ├───────░─────────┤M├─────────────╫─────────────────░───────╫─┤M├──────────────\n     ├───┤└───┘       ░         └╥┘ ┌─┐         ║                 ░       ║ └╥┘┌─┐           \nq_2: ┤ X ├────────────░──────────╫──┤M├─────────╫─────────────────░───────╫──╫─┤M├───────────\n     ├───┤            ░          ║  └╥┘┌─┐      ║                 ░       ║  ║ └╥┘┌───┐┌─┐   \nq_3: ┤ H ├────────────░──────────╫───╫─┤M├──────╫─────────────────░───────╫──╫──╫─┤ H ├┤M├───\n     ├───┤            ░          ║   ║ └╥┘┌───┐ ║  ┌─┐ ┌───┐      ░       ║  ║  ║ ├───┤└╥┘┌─┐\nq_4: ┤ X ├────────────░──────────╫───╫──╫─┤ H ├─╫──┤M├─┤ H ├──────░───────╫──╫──╫─┤ H ├─╫─┤M├\n     └───┘            ░          ║   ║  ║ └───┘ ║  └╥┘ └───┘      ░       ║  ║  ║ └───┘ ║ └╥┘\nc_0: ════════════════════════════╬═══╬══╬═══════╬═══╬═════════════════════╩══╬══╬═══════╬══╬═\n                                 ║   ║  ║       ║   ║                        ║  ║       ║  ║ \nc_1: ════════════════════════════╬═══╬══╬═══════╬═══╬════════════════════════╩══╬═══════╬══╬═\n                                 ║   ║  ║       ║   ║                           ║       ║  ║ \nc_2: ════════════════════════════╬═══╬══╬═══════╬═══╬═══════════════════════════╩═══════╬══╬═\n                                 ║   ║  ║       ║   ║                                   ║  ║ \nc_3: ════════════════════════════╬═══╬══╬═══════╬═══╬═══════════════════════════════════╩══╬═\n                                 ║   ║  ║       ║   ║                                      ║ \nc_4: ════════════════════════════╬═══╬══╬═══════╬═══╬══════════════════════════════════════╩═\n                                 ║   ║  ║       ║   ║                                        \nc_5: ════════════════════════════╬═══╬══╬═══════╩═══╬════════════════════════════════════════\n                                 ║   ║  ║           ║                                        \nc_6: ════════════════════════════╩═══╬══╬═══════════╬════════════════════════════════════════\n                                     ║  ║           ║                                        \nc_7: ════════════════════════════════╩══╬═══════════╬════════════════════════════════════════\n                                        ║           ║                                        \nc_8: ═══════════════════════════════════╩═══════════╬════════════════════════════════════════\n                                                    ║                                        \nc_9: ═══════════════════════════════════════════════╩════════════════════════════════════════\n                                                                                             "
+    }
+  }
+}

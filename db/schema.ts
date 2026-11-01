@@ -28,3 +28,7 @@ export const quantumJobs = sqliteTable("quantum_jobs", {
   ownerId: text("owner_id").notNull(), status: text("status").notNull().default("queued"),
   result: text("result"),
 }, table => [index("quantum_jobs_owner_created_idx").on(table.ownerId, table.createdAt)]);
+
+export const ownerLoginAttempts = sqliteTable("owner_login_attempts", {
+  id: text("id").primaryKey(), attempts: integer("attempts").notNull(), resetAt: integer("reset_at").notNull(),
+});

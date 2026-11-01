@@ -2,7 +2,7 @@
 
 An orange-and-black messaging app with an inline BB84 startup flow, a conditional disturbance-detection planner, and IBM Quantum hardware demonstrations.
 
-[Open the application](https://master1287.github.io/qbits_chat/)
+[Open the application](https://qubit-bb84-messenger.chalkypath1.chatgpt.site/)
 
 ## Experience
 
@@ -32,3 +32,11 @@ Server secrets are configured only in the backend runtime. No API keys, local se
 - docs/ — static GitHub Pages launch page.
 
 The source includes tests for confidence calculations, planned sampling, message tampering, room access, Qiskit interoperability, and IBM job boundaries. Real hardware availability and execution timing depend on IBM's queue and instance allocation.
+
+## Independent Cloudflare deployment
+
+The cloudflare-migration branch supports a standalone Cloudflare Workers deployment with D1. Its build command is `npm run build:cloudflare`; deployment uses `npm run deploy:cloudflare`. It does not use ChatGPT sign-in.
+
+IBM hardware access is restricted to the owner through `/owner-login`, using a private OWNER_ACCESS_KEY configured as a runtime secret. The Worker strips client-supplied identity headers and checks a signed, secure session cookie. Chat participants use the existing room invitations.
+
+Required runtime secrets are CHAT_MASTER_KEY, OWNER_ACCESS_KEY, IBM_QUANTUM_API_KEY, and IBM_QUANTUM_CRN. Configure them in Cloudflare, never in this repository. Apply the migrations in drizzle to the D1 database bound as DB. A new database starts with empty history; the previous host retains its own data.

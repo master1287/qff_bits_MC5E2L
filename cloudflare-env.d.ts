@@ -1,5 +1,7 @@
 declare namespace Cloudflare {
   interface Env {
+    QUBIT_STANDALONE?: string;
+    OWNER_ACCESS_KEY?: string;
     DB?: D1Database;
     BUCKET?: R2Bucket;
     CHAT_MASTER_KEY?: string;

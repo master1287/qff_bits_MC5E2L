@@ -150,7 +150,7 @@ export async function quantumStatus(request: Request) {
   const current = env as IBMEnv;
   const configured = Boolean(current.IBM_QUANTUM_API_KEY && current.IBM_QUANTUM_CRN);
   if (!configured) return { configured: false, provider: PROVIDER, canSubmit: false, reason: "IBM Quantum hardware has not been configured on the server." };
-  if (!request.headers.get("oai-authenticated-user-id")) return { configured: true, provider: PROVIDER, canSubmit: false, reason: "Sign in to this site to run a hardware demonstration." };
+  if (!request.headers.get("oai-authenticated-user-id")) return { configured: true, provider: PROVIDER, canSubmit: false, reason: "Sign in to this site to run a hardware demonstration.", ...(current.QUBIT_STANDALONE === "true" ? { signInPath: "/owner-login", signInLabel: "Owner sign-in" } : {}) };
   try {
     if (env.DB) {
       const pending = await env.DB.prepare("SELECT id,backend FROM quantum_jobs WHERE owner_id = ? AND status IN ('submitting','uncertain','queued','running') LIMIT 1").bind(owner(request)).first<{ id: string; backend: string }>();

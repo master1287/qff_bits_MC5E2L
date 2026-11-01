@@ -15,6 +15,13 @@
       "when": 1793465364475,
       "tag": "0001_violet_the_professor",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1793513356611,
+      "tag": "0002_lucky_white_tiger",
+      "breakpoints": true
     }
   ]
 }

@@ -1,0 +1,26 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "qbits-chat",
+	"main": "worker/standalone.ts",
+	"compatibility_date": "2026-05-15",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"workers_dev": true,
+	"vars": {
+		"QUBIT_STANDALONE": "true",
+		"IBM_QUANTUM_PLAN_MODE": "free",
+		"IBM_QUANTUM_FREE_PLAN_ID": "850b21a7-71de-4e53-9441-1abdd202f35d"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "qbits-chat-db",
+			"database_id": "44e765a5-e7f1-4254-92c7-c7d02b33acd7",
+			"migrations_dir": "drizzle"
+		}
+	],
+	"observability": {
+		"enabled": true
+	}
+}

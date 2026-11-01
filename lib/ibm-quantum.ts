@@ -65,11 +65,19 @@ async function ibm(path: string, method = "GET", body?: Dict): Promise<Dict> {
   let response: Response;
   try {
     response = await fetch(base + path, { method, redirect: "manual", signal: AbortSignal.timeout(20000),
-      headers: { Accept: "application/json", "Content-Type": "application/json", Authorization: `Bearer ${token}`, "Service-CRN": crn, "IBM-API-Version": VERSION },
+      headers: { Accept: "application/json", "Content-Type": "application/json", "User-Agent": "Qubit-BB84-Messenger/1.0", Authorization: `Bearer ${token}`, "Service-CRN": crn, "IBM-API-Version": VERSION },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
   } catch { throw new QuantumError(502, method === "POST" ? "The IBM submission could not be confirmed. Check IBM Workloads before retrying." : "IBM Quantum is temporarily unreachable."); }
   if (!response.ok) {
+    // Log transport metadata only: never headers, credentials, or response text.
+    const rejectionText = (await response.text()).slice(0, 4096);
+    const edgeCode = rejectionText.match(/error code:\s*(\d{3,5})/i)?.[1];
+    console.error("IBM_REQUEST_REJECTED", JSON.stringify({
+      method, path: path.replace(/\/jobs\/[^/]+/, "/jobs/:id"), status: response.status,
+      contentType: response.headers.get("content-type"), server: response.headers.get("server"),
+      edgeCode: edgeCode ?? null, html: /<html|<!doctype/i.test(rejectionText), challenge: response.headers.get("cf-mitigated") === "challenge",
+    }));
     const message = response.status === 409 ? "The IBM instance usage limit has been reached." : response.status === 401 || response.status === 403 ? "IBM Quantum did not authorize this operation for the configured instance." : "IBM Quantum could not complete this operation.";
     throw new QuantumError(response.status === 409 ? 409 : 502, message, method === "POST" && response.status >= 400 && response.status < 500);
   }

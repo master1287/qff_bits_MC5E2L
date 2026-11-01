@@ -2,7 +2,7 @@
 
 An orange-and-black messaging app with an inline BB84 startup flow, a conditional disturbance-detection planner, and IBM Quantum hardware demonstrations.
 
-[Open the application](https://qubit-bb84-messenger.chalkypath1.chatgpt.site/)
+[Open the application](https://qbits-chat.systemwindows6432.workers.dev/)
 
 ## Experience
 
@@ -18,7 +18,7 @@ The five-qubit teaching sample is independent of conversation key material. IBM 
 
 ## Hosting
 
-This repository contains the source and a GitHub Pages launch page. GitHub Pages serves static files and links visitors to the full application, whose backend and database run on the existing hosting service. GitHub Pages does not receive IBM credentials or conversation keys.
+This repository contains the source and a GitHub Pages launch page. GitHub Pages serves static files and links visitors to the full application, whose backend and database run on Cloudflare Workers with a D1 database. GitHub Pages does not receive IBM credentials or conversation keys.
 
 Server secrets are configured only in the backend runtime. No API keys, local secret files, local database state, or private local-running guide belong in this repository.
 
@@ -35,7 +35,7 @@ The source includes tests for confidence calculations, planned sampling, message
 
 ## Independent Cloudflare deployment
 
-The cloudflare-migration branch supports a standalone Cloudflare Workers deployment with D1. Its build command is `npm run build:cloudflare`; deployment uses `npm run deploy:cloudflare`. It does not use ChatGPT sign-in.
+This repository supports a standalone Cloudflare Workers deployment with D1. Its build command is `npm run build:cloudflare`; deployment uses `npm run deploy:cloudflare`. It does not use ChatGPT sign-in.
 
 IBM hardware access is restricted to the owner through `/owner-login`, using a private OWNER_ACCESS_KEY configured as a runtime secret. The Worker strips client-supplied identity headers and checks a signed, secure session cookie. Chat participants use the existing room invitations.
 
